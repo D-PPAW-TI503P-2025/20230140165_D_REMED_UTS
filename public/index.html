@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library System with Geolocation</title>
+    <meta name="description" content="Simple library management system with geolocation tracking">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           LOGIN SCREEN
+        ============================================ */
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 6px;
+        }
+
+        .login-tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .login-tab-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .primary-btn:hover {
+            background: #5568d3;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ============================================
+           HEADER
+        ============================================ */
+        header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            color: #dc3545;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* ============================================
+           CONTAINER & TABS
+        ============================================ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            padding: 12px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        /* ============================================
+           SECTIONS
+        ============================================ */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-header {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .section-desc {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* ============================================
+           BOOK CATALOGUE
+        ============================================ */
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .book-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .book-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .book-info h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .book-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .stock-tag {
+            background: #e8f0fe;
+            color: #1967d2;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .borrow-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .borrow-btn:hover {
+            background: #5568d3;
+        }
+
+        /* ============================================
+           ADMIN FORM
+        ============================================ */
+        .form-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* ============================================
+           TABLE VIEW
+        ============================================ */
+        .table-container {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f5f5f5;
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .refresh-btn {
+            margin-bottom: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #f5f5f5;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        /* ============================================
+           UTILITY CLASSES
+        ============================================ */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: #666;
+        }
+
+        .loading {
+            padding: 40px;
+            text-align: center;
+            color: #666;
+        }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* ============================================
+           RESPONSIVE
+        ============================================ */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .tabs {
+                flex-direction: column;
+                border-bottom: none;
+            }
+
+            .tab-btn {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+                text-align: left;
+            }
+
+            .tab-btn.active {
+                border-left-color: #667eea;
+                border-bottom-color: transparent;
+            }
+
+            .book-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 600px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============================================
+         LOGIN SCREEN
+    ============================================ -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-icon">📚</div>
+                <h1 class="login-title">Library System</h1>
+                <p class="login-subtitle">Sistem Perpustakaan dengan Geolocation</p>
+            </div>
+
+            <div class="login-tabs">
+                <button class="login-tab-btn active" id="tab-user" onclick="switchLoginMode('user')">
+                    Mahasiswa
+                </button>
+                <button class="login-tab-btn" id="tab-admin" onclick="switchLoginMode('admin')">
+                    Admin
+                </button>
+            </div>
+
+            <div id="user-input-group">
+                <input type="text" id="login-userid" class="login-input" placeholder="Masukkan NIM / User ID"
+                    autocomplete="off">
+            </div>
+
+            <button class="primary-btn" onclick="handleLogin()">Masuk</button>
+        </div>
+    </div>
+
+    <!-- ============================================
+         MAIN APPLICATION
+    ============================================ -->
+    <div id="main-app" class="hidden">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span>📚</span>
+                    <span>Library System</span>
+                </div>
+                <div class="user-badge">
+                    <span id="user-display-name">Guest</span>
+                    <span class="logout-btn" onclick="handleLogout()">Keluar</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Navigation Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('katalog')">
+                    Katalog Buku
+                </button>
+                <button class="tab-btn admin-only hidden" onclick="showTab('admin')">
+                    Admin Panel
+                </button>
+                <button class="tab-btn admin-only hidden" onclick="showTab('db')">
+                    Log Peminjaman
+                </button>
+            </div>
+
+            <!-- ============================================
+                 SECTION 1: KATALOG BUKU
+            ============================================ -->
+            <div id="katalog" class="section active">
+                <div class="section-header">
+                    <h2 class="section-title">Katalog Buku</h2>
+                    <p class="section-desc">
+                        Daftar buku yang tersedia. Lokasi peminjaman akan dicatat otomatis.
+                    </p>
+                </div>
+
+                <div id="book-list" class="book-grid">
+                    <div class="loading">Memuat data buku...</div>
+                </div>
+            </div>
+
+            <!-- ============================================
+                 SECTION 2: ADMIN PANEL
+            ============================================ -->
+            <div id="admin" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Tambah Buku Baru</h2>
+                    <p class="section-desc">Form untuk menambahkan buku ke dalam sistem</p>
+                </div>
+
+                <div class="form-card">
+                    <div class="form-group">
+                        <label for="newTitle">Judul Buku</label>
+                        <input type="text" id="newTitle" placeholder="Masukkan judul buku">
+                    </div>
+                    <div class="form-group">
+                        <label for="newAuthor">Nama Penulis</label>
+                        <input type="text" id="newAuthor" placeholder="Masukkan nama penulis">
+                    </div>
+                    <div class="form-group">
+                        <label for="newStock">Stok</label>
+                        <input type="number" id="newStock" value="10" min="0">
+                    </div>
+                    <button class="primary-btn" onclick="addBook()">Simpan Buku</button>
+                </div>
+            </div>
+
+            <!-- ============================================
+                 SECTION 3: LOG PEMINJAMAN
+            ============================================ -->
+            <div id="db" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Log Peminjaman</h2>
+                    <p class="section-desc">Riwayat peminjaman buku dengan data geolocation</p>
+                </div>
+
+                <button class="refresh-btn" onclick="fetchLogs()">🔄 Refresh Data</button>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User ID</th>
+                                <th>Buku</th>
+                                <th>Lokasi (Lat, Long)</th>
+                                <th>Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="log-list">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted" style="padding: 30px;">
+                                    Klik "Refresh Data" untuk memuat log
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         JAVASCRIPT
+    ============================================ -->
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        let session = {
+            id: null,
+            role: null
+        };
+
+        // AUTH
+        function switchLoginMode(mode) {
+            const userInput = document.getElementById('user-input-group');
+            const tabUser = document.getElementById('tab-user');
+            const tabAdmin = document.getElementById('tab-admin');
+
+            if (mode === 'admin') {
+                session.role = 'admin';
+                userInput.classList.add('hidden');
+                tabUser.classList.remove('active');
+                tabAdmin.classList.add('active');
+            } else {
+                session.role = 'user';
+                userInput.classList.remove('hidden');
+                tabAdmin.classList.remove('active');
+                tabUser.classList.add('active');
+            }
+        }
+
+        function handleLogin() {
+            if (session.role === 'admin') {
+                session.id = 'ADMIN';
+            } else {
+                const idInput = document.getElementById('login-userid').value.trim();
+                if (!idInput) {
+                    alert("Mohon masukkan User ID / NIM");
+                    return;
+                }
+                session.id = idInput;
+            }
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            updateUIForRole();
+            fetchBooks();
+        }
+
+        function handleLogout() {
+            session = { id: null, role: null };
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-userid').value = '';
+            switchLoginMode('user');
+        }
+
+        function updateUIForRole() {
+            const adminButtons = document.querySelectorAll('.admin-only');
+            const userBadge = document.getElementById('user-display-name');
+
+            if (session.role === 'admin') {
+                userBadge.textContent = "Admin";
+                adminButtons.forEach(btn => btn.classList.remove('hidden'));
+            } else {
+                userBadge.textContent = "User: " + session.id;
+                adminButtons.forEach(btn => btn.classList.add('hidden'));
+                showTab('katalog');
+            }
+        }
+
+        // NAVIGATION
+        function showTab(tabId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            if (tabId === 'katalog') fetchBooks();
+            if (tabId === 'db' && session.role === 'admin') fetchLogs();
+        }
+
+        // FETCH BOOKS
+        async function fetchBooks() {
+            try {
+                const res = await fetch(`${API_URL}/books`);
+                const books = await res.json();
+                const container = document.getElementById('book-list');
+
+                if (books.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📚</div>
+                            <p>Belum ada buku tersedia</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = '';
+                books.forEach(b => {
+                    // Tampilan berbeda untuk Admin dan User
+                    if (session.role === 'admin') {
+                        // Admin: Tampilkan tombol Edit & Hapus
+                        container.innerHTML += `
+                            <div class="book-card">
+                                <div class="book-info">
+                                    <h3>${b.title}</h3>
+                                    <p>Penulis: ${b.author}</p>
+                                </div>
+                                <div class="book-meta">
+                                    <span class="stock-tag">Stok: ${b.stock}</span>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="borrow-btn" style="background: #28a745;" onclick="editBook(${b.id}, '${b.title.replace(/'/g, "\\'")}', '${b.author.replace(/'/g, "\\'")}', ${b.stock})">✏️ Edit</button>
+                                        <button class="borrow-btn" style="background: #dc3545;" onclick="deleteBook(${b.id}, '${b.title.replace(/'/g, "\\'")}')">🗑️ Hapus</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // User: Tampilkan tombol Pinjam
+                        container.innerHTML += `
+                            <div class="book-card">
+                                <div class="book-info">
+                                    <h3>${b.title}</h3>
+                                    <p>Penulis: ${b.author}</p>
+                                </div>
+                                <div class="book-meta">
+                                    <span class="stock-tag">Stok: ${b.stock}</span>
+                                    <button class="borrow-btn" onclick="borrowBook(${b.id})">Pinjam</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            } catch (e) {
+                document.getElementById('book-list').innerHTML = `
+                    <div class="empty-state">
+                        <p style="color: #dc3545;">Gagal memuat data. Pastikan server berjalan.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // FETCH LOGS
+        async function fetchLogs() {
+            const tbody = document.getElementById('log-list');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/borrow/logs`, {
+                    headers: { 'x-user-role': session.role }
+                });
+                const logs = await res.json();
+                tbody.innerHTML = '';
+
+                if (!res.ok) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="color:#dc3545;">Error: ${logs.message}</td></tr>`;
+                    return;
+                }
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Belum ada data peminjaman</td></tr>`;
+                    return;
+                }
+
+                logs.forEach(log => {
+                    const bookTitle = log.Book ? log.Book.title : `ID: ${log.bookId}`;
+                    const date = new Date(log.borrowDate).toLocaleString('id-ID');
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${log.id}</td>
+                            <td>${log.userId}</td>
+                            <td>${bookTitle}</td>
+                            <td>
+                                <a href="https://www.google.com/maps?q=${log.latitude},${log.longitude}" 
+                                   target="_blank" style="color: #667eea;">
+                                    ${log.latitude.toFixed(4)}, ${log.longitude.toFixed(4)}
+                                </a>
+                            </td>
+                            <td>${date}</td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="color:#dc3545;">Gagal mengambil data</td></tr>`;
+            }
+        }
+
+        // ADD BOOK
+        async function addBook() {
+            const title = document.getElementById('newTitle').value.trim();
+            const author = document.getElementById('newAuthor').value.trim();
+            const stock = document.getElementById('newStock').value;
+
+            if (!title || !author) {
+                alert('Mohon isi judul dan penulis');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/books`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-user-role': session.role
+                    },
+                    body: JSON.stringify({ title, author, stock })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('Buku berhasil ditambahkan');
+                    document.getElementById('newTitle').value = '';
+                    document.getElementById('newAuthor').value = '';
+                    document.getElementById('newStock').value = '10';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (e) {
+                alert('Gagal terhubung ke server');
+            }
+        }
+
+        // BORROW BOOK
+        async function borrowBook(bookId) {
+            if (session.role === 'admin') {
+                alert("Admin tidak bisa meminjam buku");
+                return;
+            }
+
+            if (!confirm("Pinjam buku ini? Lokasi Anda akan dicatat.")) {
+                return;
+            }
+
+            // Simulate geolocation
+            const lat = -6.200000 + (Math.random() * 0.01);
+            const long = 106.816666 + (Math.random() * 0.01);
+
+            try {
+                const res = await fetch(`${API_URL}/borrow`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-user-role': session.role,
+                        'x-user-id': session.id
+                    },
+                    body: JSON.stringify({ bookId, latitude: lat, longitude: long })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(`Peminjaman berhasil!\nLokasi: ${lat.toFixed(5)}, ${long.toFixed(5)}`);
+                    fetchBooks();
+                } else {
+                    alert('Gagal: ' + data.message);
+                }
+            } catch (e) {
+                alert('Gagal terhubung ke server');
+            }
+        }
+
+        // EDIT BOOK (UPDATE)
+        async function editBook(id, currentTitle, currentAuthor, currentStock) {
+            // Prompt untuk edit
+            const newTitle = prompt('Edit Judul Buku:', currentTitle);
+            if (newTitle === null) return; // User cancel
+
+            const newAuthor = prompt('Edit Penulis:', currentAuthor);
+            if (newAuthor === null) return;
+
+            const newStock = prompt('Edit Stok:', currentStock);
+            if (newStock === null) return;
+
+            // Validasi
+            if (!newTitle.trim() || !newAuthor.trim()) {
+                alert('Judul dan penulis tidak boleh kosong!');
+                return;
+            }
+
+            const stockNum = parseInt(newStock);
+            if (isNaN(stockNum) || stockNum < 0) {
+                alert('Stok harus berupa angka positif!');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/books/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-user-role': session.role
+                    },
+                    body: JSON.stringify({
+                        title: newTitle.trim(),
+                        author: newAuthor.trim(),
+                        stock: stockNum
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Buku berhasil diupdate!');
+                    fetchBooks(); // Refresh katalog
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            } catch (e) {
+                alert('❌ Gagal terhubung ke server');
+            }
+        }
+
+        // DELETE BOOK
+        async function deleteBook(id, title) {
+            // Konfirmasi hapus
+            if (!confirm(`⚠️ Yakin ingin menghapus buku:\n"${title}"?\n\nData yang sudah dihapus tidak bisa dikembalikan!`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/books/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-user-role': session.role
+                    }
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Buku berhasil dihapus!');
+                    fetchBooks(); // Refresh katalog
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            } catch (e) {
+                alert('❌ Gagal terhubung ke server');
+            }
+        }
+
+        // Initialize
+        switchLoginMode('user');
+    </script>
+
+</body>
+
+</html>
